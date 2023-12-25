@@ -1,9 +1,10 @@
-img=imread('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\P9170054.jfif');
+img=imread('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\P9170008.jfif');
 grayimg=rgb2gray(img);
 %%
 
 [rows, columns, numberOfColorChannels] = size(img);
 img = imcrop(img, [1, ceil((rows/3)*1), columns, floor((rows/3)*2)]);
+grayimg = imcrop(grayimg, [1, ceil((rows/3)*1), columns, floor((rows/3)*2)]);
 
 redChannel = img(:, :, 1);
 greenChannel = img(:, :, 2);
@@ -53,7 +54,10 @@ for i=1:height(roi)/2
         boundingBox=[roi(i,1),roi(i,2),roi(i,3),roi(i,4)];
     end
 end
-boundingBox
+boundingBox;
+img = insertShape(erodedI,"rectangle",boundingBox);
+figure;
+imshow(img);
 
 %% try to find regions for each character
 % Display it.
@@ -81,7 +85,6 @@ roi(:,3:4) = roi(:,3:4) + 2*numAdditionalPixels;
 img = insertShape(uint8(BWimg),"rectangle",roi);
 figure;
 imshow(img);
-
 %%
 results = ocr(imcomplement(BWimg),roi,LayoutAnalysis="none");
 aasd={};
@@ -89,12 +92,13 @@ for i= 1 :numel(results)
   aasd=[aasd,strtrim(results(i).Text)]
 end
 strjoin(aasd)
-%%
+%% Combined solution for running all at once
+fid = fopen('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\answer.txt', 'w');
 imagefiles = dir('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\*.jfif');      
 nfiles = length(imagefiles);    % Number of files found
 
 for ii=1:nfiles
-    currentfilename = imagefiles(ii).name
+    currentfilename = imagefiles(ii).name;
     img = imread(strcat('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\',currentfilename));
     grayimg=rgb2gray(img);
     [rows, columns, numberOfColorChannels] = size(img);
@@ -131,7 +135,7 @@ for ii=1:nfiles
             boundingBox=[roi(i,1),roi(i,2),roi(i,3),roi(i,4)];
         end
     end
-    boundingBox
+    boundingBox;
     % cut it
     BWimg=grayimg<128;
 
@@ -139,7 +143,7 @@ for ii=1:nfiles
     BWimg=imclearborder(BWimg);
     BWimg=imfill(BWimg,"holes");
 
-    figure,imshow(BWimg);
+    %figure,imshow(BWimg);
     croped=bwconncomp(BWimg);
     stats = regionprops(croped, ["BoundingBox","Area"]);
     roi = vertcat(stats(:).BoundingBox);
@@ -147,18 +151,21 @@ for ii=1:nfiles
     areaConstraint = area > 220;
     roi = double(roi(areaConstraint,:));
     
-    %numAdditionalPixels = 5;
-    %roi(:,1:2) = roi(:,1:2) - numAdditionalPixels;
-    %roi(:,3:4) = roi(:,3:4) + 2*numAdditionalPixels;
-    img = insertShape(uint8(BWimg),"rectangle",roi);
-    figure,imshow(img);
-    results = ocr(imcomplement(BWimg),roi,LayoutAnalysis="none");
+    numAdditionalPixels = 5;
+    roi(:,1:2) = roi(:,1:2) - numAdditionalPixels;
+    roi(:,3:4) = roi(:,3:4) + 2*numAdditionalPixels;
+    checked=checkr(roi,BWimg);
+    img = insertShape(uint8(BWimg),"rectangle",checked);
+    %figure,imshow(img);
+    results = ocr(imcomplement(BWimg),checked,LayoutAnalysis="none");
     aasd={};
     for i= 1 :numel(results)
       aasd=[aasd,strtrim(results(i).Text)];
     end
-    strjoin(aasd)
+    plate=strjoin(aasd)
+    fprintf(fid,strcat(currentfilename,",",plate,"\n"));
 end
+fclose(fid);
 %%
 imagefiles = dir('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\*.jfif');      
 nfiles = length(imagefiles);    % Number of files found
@@ -185,4 +192,38 @@ for ii=1:nfiles
     erodedI = imerode(labeledImage,se);
     figure;
     imshow(erodedI);
+end
+%%
+figure,imshow(img)
+%%
+size(img)
+checked
+roiasd=checkr(checked,img);
+roiasd
+%%
+roi(1,2)<0
+if roi(1,2)<0
+    "asd"
+end
+%% 
+function checkRoi=checkr(roi,img)
+    [y,x,c]=size(img)
+    for j=1:height(roi)
+        for i=1:2:4
+            if(roi(j,i)<=0)
+                roi(j,i)=1;
+                roi(j,i)
+            end
+            if(roi(j,i)>=x)
+                roi(j,i)=x-1;
+            end
+            if(roi(j,i+1)<=0)
+                roi(j,i+1)=1;
+            end
+            if(roi(j,i+1)>=y)
+                roi(j,i+1)=y-1;
+            end
+        end
+    end
+    checkRoi=roi;
 end
