@@ -168,13 +168,13 @@ for ii=1:nfiles
     fprintf(fid,strcat(currentfilename,",",plate,"\n"));
 end
 fclose(fid);
-%%
-imagefiles = dir('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\*.jfif');      
-nfiles = length(imagefiles);    % Number of files found
+%% Helper functions for running the 2 parts separetly
+fid = fopen('./answer.txt', 'w');
+imagefiles = dir('./pic/*.jfif');   
 
 for ii=1:nfiles
     currentfilename = imagefiles(ii).name
-    img = imread(strcat('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\',currentfilename));
+    img = imread(strcat('./pic/',currentfilename));
     [rows, columns, numberOfColorChannels] = size(img);
     img = imcrop(img, [1, ceil((rows/3)*1), columns, floor((rows/3)*2)]);
     redChannel = img(:, :, 1);
@@ -207,7 +207,7 @@ roi(1,2)<0
 if roi(1,2)<0
     "asd"
 end
-%% 
+%% Function for checking the bounding box
 function checkRoi=checkr(roi,img)
     [y,x,c]=size(img)
     for j=1:height(roi)
