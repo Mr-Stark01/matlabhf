@@ -1,7 +1,6 @@
-img=imread('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\P9170008.jfif');
+img=imread('./pic/P9170008.jfif');
 grayimg=rgb2gray(img);
 %%
-
 [rows, columns, numberOfColorChannels] = size(img);
 img = imcrop(img, [1, ceil((rows/3)*1), columns, floor((rows/3)*2)]);
 grayimg = imcrop(grayimg, [1, ceil((rows/3)*1), columns, floor((rows/3)*2)]);
@@ -18,7 +17,9 @@ imshow(mask);
 labeledImage = imclearborder(mask);
 labeledImage = bwlabel(labeledImage);
 labeledImage = imfill(labeledImage,'holes');
-
+figure;
+imshow(labeledImage);
+%% asd
 se = strel('square',5);
 erodedI = imerode(labeledImage,se);
 figure;
@@ -62,6 +63,7 @@ imshow(img);
 %% try to find regions for each character
 % Display it.
 BWimg=grayimg<128;
+croppedgrayimg=imcrop(grayimg,boundingBox);
 BWimg=imcrop(BWimg,boundingBox);
 BWimg=imclearborder(BWimg);
 figure,imshow(BWimg);
@@ -69,7 +71,7 @@ croped=bwconncomp(BWimg);
 stats = regionprops(croped, ["BoundingBox","Area"]);
 roi = vertcat(stats(:).BoundingBox);
 area = vertcat(stats(:).Area);
-img = insertObjectAnnotation(cropedgrayimg,"rectangle",roi,area,"LineWidth",2);
+img = insertObjectAnnotation(croppedgrayimg,"rectangle",roi,area,"LineWidth",2);
 figure;
 imshow(img);
 %% enhance the found regions with limit 
@@ -93,13 +95,13 @@ for i= 1 :numel(results)
 end
 strjoin(aasd)
 %% Combined solution for running all at once
-fid = fopen('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\answer.txt', 'w');
-imagefiles = dir('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\*.jfif');      
+fid = fopen('./answer.txt', 'w');
+imagefiles = dir('./pic/*.jfif');      
 nfiles = length(imagefiles);    % Number of files found
 
 for ii=1:nfiles
     currentfilename = imagefiles(ii).name;
-    img = imread(strcat('C:\Users\gydan\Desktop\Egyetem\Image and signal proc\assigments\3\pic\',currentfilename));
+    img = imread(strcat('./pic/',currentfilename));
     grayimg=rgb2gray(img);
     [rows, columns, numberOfColorChannels] = size(img);
     img = imcrop(img, [1, ceil((rows/3)*1), columns, floor((rows/3)*2)]);
